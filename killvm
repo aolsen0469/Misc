@@ -1,0 +1,23 @@
+#!/bin/bash
+# This Script is used to quickly turn off, & delete VMs
+# First it asks for the VM-name, then it asks for the filename
+# then it deletes the VM
+
+virsh list --all
+echo " Which VM would you like to be deleted? "
+read vmname
+echo "
+
+
+
+
+"
+ls /var/lib/libvirt/images
+echo " Whats the filename? "
+read filename
+
+#Execution
+virsh destroy $vmname
+virsh undefine $vmname
+rm /var/lib/libvirt/images/$filename
+echo " $filename has been deleted "
