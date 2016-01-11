@@ -1,0 +1,17 @@
+#!/bin/bash
+# killvm(2.0)
+# destroys,undefines, & deletes the virtual machine file.
+echo "
+
+
+
+
+
+
+ "
+virsh list --name --all
+echo '######################################'
+echo 'Please enter your virtual machine to be deleted'
+read choice
+
+virsh destroy $choice 2> /dev/null; virsh undefine $choice 2> /dev/null; { /bin/rm /var/lib/libvirt/images/"${choice}.img" && echo "$choice has been wiped off your system" || echo "error:couldn't delete .img file"; }
