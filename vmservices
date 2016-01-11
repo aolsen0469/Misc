@@ -1,0 +1,11 @@
+#!/bin/bash
+## Tool to start & stop certain virtual machines that provide essential services to the virtual machines on the server
+
+# If the vm "dhcp" is active -- then shut $vm down
+if [[ $(virsh list | grep dhcp) != "" ]] 
+then
+for vm in "dhcp" "ldap" "Spacewalk"; do virsh destroy "$vm"; done
+# else if the vm "dhcp is offline -- start $vm up
+elif [[ $(virsh list | grep dhcp) = "" ]]; then
+for vm in "dhcp" "ldap" "Spacewalk"; do virsh start "$vm"; done
+fi
