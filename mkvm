@@ -1,0 +1,9 @@
+#!/bin/bash
+# Quick Koan Script 
+# virt-name & virt-path are the only things you really need to define in koan, everything else is defined in profiles & distro in cobbler.
+
+
+echo "Name of your Virtual Machine: "
+read vm1
+
+koan --server=${Server=spacewalk.hpserver.net} --virt --profile=${Profile=centos60-x86_64} --virt-name=$vm1 --virt-path=/var/lib/libvirt/images/$vm1.img
