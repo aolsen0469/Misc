@@ -1,0 +1,28 @@
+# Example Cleaner
+# In setting up the ldap server, I need a faster way to clean up the .ldif templating files
+# that I'm using rather than typing the sed command over and over for every file.
+#
+
+
+# 1) Ask for name of .LDIF
+echo "                                                                                                        "
+echo " #-----------------------------#"
+/bin/ls  ~/ldap/
+echo " #-----------------------------#"
+echo "Which .ldif files would you like to fix?"
+read ldifname
+
+# 2) Clean up LDIF FILE
+sed s/dc=company,dc=com/dc=hpserver,dc=net/ <$ldifname >temp0.ldif
+#
+echo "Deleting old File.."
+/bin/rm $ldifname
+#
+sed s/company.com/hpserver.net/ <temp0.ldif >>temp1.ldif
+/bin/rm temp0.ldif
+#
+sed s/alice/ldap1/ <temp1.ldif >>$ldifname
+/bin/rm temp1.ldif
+#
+echo "a brand new $ldifname has been created"
+/bin/cat $ldifname
