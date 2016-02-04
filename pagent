@@ -1,4 +1,16 @@
 #!/bin/bash
 #quick dirty script to prep already made nodes for puppet
 # change hostname on echo
-service puppet stop; rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm; rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm; yum -y install ntp; chkconfig ntpd on; service ntpd start; yum remove -y puppet facter; rm -rf /var/lib/puppet/*; yum install puppet facter -y; /bin/rm /etc/sysconfig/network; touch /etc/sysconfig/network; chmod 644 /etc/sysconfig/network; echo "NETWORKING=yes" >> /etc/sysconfig/network; echo "HOSTNAME=web2.hpserver.net" >> /etc/sysconfig/network; cat /etc/sysconfig/network; chkconfig puppet on; reboot
+service puppet stop;
+rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm;
+rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm;
+yum -y install ntp;
+chkconfig ntpd on;
+service ntpd start;
+yum remove -y puppet facter;
+rm -rf /var/lib/puppet/*;
+yum install puppet facter -y;
+{ /bin/echo -e "NETWORK=yes\nHOSTNAME=$(hostname)" > /etc/sysconfig/network; }
+cat /etc/sysconfig/network;
+chkconfig puppet on;
+puppet agent -t
