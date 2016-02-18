@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Script to make sure older nodes are ready for the new puppet master server.
+
+SERVICE_1="puppet"
+SERVICE_2="ntpd"
+SERVICE_3="facter"
+DIR1="/var/lib/puppet/*"
+REPO_1="puppetlabs"
+# Network; Rename hostname.
+/bin/echo -e "NETWORK=yes\nHOSTNAME=$(hostname)" > /etc/sysconfig/network
+# Check RPMS & Install
+echo "Block1"
+yum repolist all | grep -v grep | grep ${REPO_1} > /dev/null
+	if [[ $? != 0 ]] # if it doesn't find puppetlabs
+		then # install repos
+			echo "Couldn't find any puppet repos, Installing Repos..."
+			rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm;
+			rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm;
+		else
+	echo "puppet repo already installed. Doing Nothing."
+fi
+
+# If Puppet Agent is running then: do these things
+echo "Block2"
+ps aux | grep -v grep | grep puppet > /dev/null; 
+	if [[ $? != 1 ]]
+		then
+			echo "Puppet Active. Stopping Service & Deleting Dirs"
+			/sbin/service ${SERVICE_1} stop; 
+			yum remove -y ${SERVICE_1} ${SERVICE_3} > /dev/null;
+			rm -rf ${DIR1}; 
+	else #If Puppet Agent IS NOT installed; then do this:
+		echo "$SERVICE_1 doesn't exist. Proceeding on to next step:"
+	fi
+echo "Installing Puppet/Facter"
+	yum install -y ${SERVICE_1} ${SERVICE_3} > /dev/null;
+	chkconfig ${SERVICE_1};
+# check if NTP is running, if not install.
+echo "Block3"
+ps aux | grep -v grep | grep ntpd > /dev/null; 
+	if [[ $? != 1 ]]
+		then
+			echo "NTP works. Moving on .."
+	elif [[ $? != 0 ]]
+		then
+		echo "NO NTP, installing it..."
+		yum install -y ${SERVICE_2};	
+		/sbin/service ${SERVICE_2} start;
+		chkconfig ${SERVICE_2} on;
+	fi
+# Update Puppet Agent
+echo "Block4"
+/sbin/service ${SERVICE_1} start; puppet agent -t
