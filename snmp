@@ -1,0 +1,63 @@
+#!/bin/bash
+# Quick script to set up snmp on nodes
+
+CONFIG="/etc/snmp/snmpd.conf"
+PCKG="net-snmp"
+LINE="view systemview included .1"
+RIGHT="net-snmp-5.5-54.el6_7.1.x86_64"
+INSTALLED=$(rpm -qa | grep $RIGHT)
+PORTCHECK=$(netstat -tuna | grep udp | grep :161)
+
+
+
+# Is SNMP Installed?
+# if no  -> install the service; make sure it starts on boot
+# if yes -> do nothing.
+
+if [[ "" == ${INSTALLED} ]]; then
+	
+	echo "No SNMP. Installing ${PCKG}"
+
+            yum install -y ${PCKG};
+	
+		chkconfig snmpd on;
+			
+	            echo "${LINE}" >> ${CONFIG}
+		
+	else
+			
+	    echo "SNMP already installed, doing nothing."
+
+fi
+
+# Does this IPtables rule exist?
+# if yes -> do nothing
+# if no  -> append rule & save
+
+iptables -L -n | grep :161 > /dev/null
+
+if [[ $? -eq 0 ]]; then
+	
+	echo "Rule Exists. Doing nothing."
+	
+else
+
+	iptables -A INPUT -p udp --dport 161 -j ACCEPT; /sbin/service iptables save
+
+fi
+
+
+# Is port UDP 161 open?
+# if yes -> do nothing
+# if no  -> restart the service
+
+if [[ "" == ${PORTCHECK} ]]; then
+	
+	/sbin/service snmpd restart
+	
+else
+
+	echo "NETSTAT: 161 already open"
+
+fi
+
