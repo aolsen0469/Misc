@@ -1,0 +1,63 @@
+#!/bin/bash
+
+RHE="centos60-x86_64"
+DEB="debian-8.2"
+SLS="openSUSE-42.1"
+EX="Exit"
+
+echo "KOAN => Installer"; \
+
+PS3='Distro Template:'
+
+options=(${RHE} ${DEB} ${SLS} ${EX})
+
+select choice in "${options[@]}"; do
+#########################
+# Red Hat Enterprise Choice
+if [[ $choice = $RHE ]]; then
+
+    echo "";
+
+	echo "You chose => ${RHE}";
+
+    fi
+#######################
+# Debian Choice
+if [[ $choice = $DEB ]]; then
+
+    echo "";
+
+	echo "You Chose => ${DEB}";
+
+    fi
+##########################
+# openSUSE Choice
+if [[ $choice = $SLS ]]; then
+
+    echo "";
+
+	echo "You chose => ${SLS}";
+
+    fi
+########################
+# Quit
+if [[ $choice = $EX ]]; then
+    echo "end"
+
+	break
+
+    fi
+########################
+# Enter VM-name; Start Koan
+echo ""
+  echo " Virtual Machine Name"
+    echo ""
+	read vmname
+          echo "You chose => ${vmname}"
+              echo ""
+
+koan --server=${Server=spacewalk.hpserver.net} --virt --profile=${choice} --virt-name=$vmname --virt-path=/var/lib/libvirt/images/$vmname.img
+
+break
+
+done
