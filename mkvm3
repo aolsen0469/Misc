@@ -1,4 +1,9 @@
 #!/bin/bash
+# 1) Make a choice on what distro
+# 2) Enter a name as a variable
+# 3) that variable with your vm-name & vm-filename
+
+
 
 RHE="centos60-x86_64"
 DEB="debian-8.2"
