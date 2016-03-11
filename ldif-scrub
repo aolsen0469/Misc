@@ -1,0 +1,24 @@
+#!/bin/bash
+# Faster than manually scrubbing .ldif templating files. 
+
+CA="dc=company,dc=com"
+CB="company.com"
+CC="alice"
+
+HA="dc=hpserver,dc=net"
+HB="hpserver.net"
+HC="ldap1"
+
+DIR=/root/ldif
+
+find /root/ldif -type f
+PS3="Filename:"
+# display files here
+read ld
+
+sed -i "s/${CA}/${HA}/" ${DIR}/$ld.ldif;
+sed -i "s/${CB}/${HB}/" ${DIR}/$ld.ldif;
+sed -i "s/${CC}/${HC}/" ${DIR}/$ld.ldif;
+
+echo "${DIR}/${ld}.ldif has been scrubbed"
+
