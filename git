@@ -6,4 +6,4 @@ echo "Name:"
 echo "Description:"
     read -r message
     	git commit -m "${message}"
-	    git push
+	    git push -u origin master
