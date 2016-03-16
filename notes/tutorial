@@ -1,0 +1,183 @@
+# Shell Script Skeleton
+Different Styless:
+
+#1
+if COMMANDS
+then OTHER COMMANDS
+fi
+
+#2
+if COMMANDS
+then
+	OTHER COMMANDS
+fi
+
+#3
+if COMMANDS; then
+	OTHER COMMANDS
+fi
+
+#Starting Lines
+
+#Ending Lines
+You must have a break between the 'if' statement and the 'then' construct. This can be a 
+semi-colon or a newline. Doesn't matter.
+
+################################################
+# Commands; Argument Splitting; Writing Scripts#
+################################################
+
+#####################
+# Special Characters#
+# ###################
+""   = Whitespace- This is a tab, newline, verticle tab, form feed, carriage return or space, bash uses whitespace to determine where a word begins & ends. The first word is a command name & additional words become arguments to that command.
+''   = Single Quotes - Literal, Special characters are ignored, Words are prevented from being split
+$    = Expansion- Does various types of expansion: parameter expansion ($var or ${var}), command substitution ( $(command) ). or arthimatic expansion (  $((expression)) ).
+:    = Colon - always evaluates to true
+\    = Escape - Prevents the next character being interpreted as a special character.
+`#`  = Comment - Notes that aren't processed by shell.
+[[]] = Test - Evaluates Conditions.
+!    = Negate - Used to negate/reverse a test or exit status.
+><   = Redirection - Redirects a command's input or output.
+|    = Pipe - Redirects output from initial command to the input of a 2nd command.
+;    = Command Seperator - Represents a newline. Seperates multiple commands on same line.
+{}   = Inline Group - Commands inside curly braces are treated as one command. 
+()   = Subshell Group - Similar to inline, but commands are executed in subshell.
+(()) = Arithmetic - Characters such as +, -, *, / are operators used for calculations.
+$(())= Arithmetic expansion - Expression  is replaced with the result of its evaluation. 
+~    = Home Directory - Tilde is a representation of the home directory. ~/
+
+#############
+# Parameters# 
+#############
+"$0"  = 0 - Contains the name/path of the script. (Not reliable)
+"$1"  = 1,2 etc - Positional Parameters contains arguments that we're passed to the script/func.
+"$*"  = * - Expands to all the words of all the positional parameters. expands to single string
+"$@"  = @ - Expands to all the words of the positional parameters. "",expands to list individually
+$`#`  = # - Expands to the number of positional parameters that are currently set.
+$?    = ? - Expands to the exit code of the most recently completed foreground command.
+$$    = $ - Expands to the PID of the current shell.
+$!    = ! - Expands  to the PID of the command most recently executed in the background
+"$_"  = $_ - Expands to the last argument of the last command that was executed
+
+##########
+# Arrays##
+##########
+
+
+
+###########################
+# Conditional Loops	###
+###########################
+If we want to repeat a task twenty times, we don't want to type the code in twenty times and change
+ it slightly. As a result we have loops.
+
+# for variable in words
+The "For" loop is appropriate when we have a list of things we need to do sequentially.
+	#Format
+	#for x in /etc/r??? /var/lo* /home/aolsen/mystuff/* /tmp/${MYPATH}/*
+	#do
+	#	cp $x /mnt/mydir
+	#done
+
+# while command
+The "While" loop is for when we don't know exactly how many times we need to repeat something, it
+keeps going until we find what we're looking for.
+	#Format
+	#myvar=0
+	#while [ $myvar -ne 10 ]
+	#do
+	#	echo $myvar
+	#	mybar=$(( $myvar + 1 ))
+	#done
+
+The "Until" loop is the inverse of "while" statements. They repeat so as long as the condition is
+false.
+	#Format
+	#myvar=0
+	#until [ $myvar -eq 10 ]
+	#do
+	#	echo $myvar
+	#	myvar=$(( $myvar + 1 ))
+	#done
+# for (( expression; expression; expression ))
+Starts by evaluating the first arthmetic expression, repeats the loop as long as the second
+arithmetic expression is sucessful, and at the end of each loop evaluates the third arithmetic
+expression.
+
+
+###########################
+# Tests & Conditionals ###
+###########################
+
+# Control Operators ( && and || )
+These operators are used between two commands, they're used to control whether the second
+command should be executed based on the first. 
+&& = And - Will check the result of the first command. If it fails, it will do nothing.
+	# mkdir fart && cd fart
+|| = Or  - It only executes the next command if the first failed.
+	# rm /etc/some_file.conf || echo "Couldn't remove the file"
+
+# (if elif then else fi)
+	#Format
+	#if  [ condition1 ]
+	#then
+	#	action
+	#elif	[ condition2 ]
+	#then
+	#	action2
+	#
+	#elif [ condition3 ]
+	#then
+	#	action3
+	#else
+	#	actionx
+	#fi
+
+You must have a break between the if statement and the then construct.
+IT doesn't matter if its a semicolon; or a newline
+#######################
+# Choices
+# ####################
+
+# case statement
+The case statement basically enumerates several possible glob patterns and checks the
+content of your pattern against these.it saves you from having to do like ten different 
+if .. then .. else statements
+
+
+case $LANG in
+    en*) echo 'Hello!' ;;
+    fr*) echo 'Salut!' ;;
+    de*) echo 'Guten Tag!' ;;
+    nl*) echo 'Hallo!' ;;
+    it*) echo 'Ciao!' ;;
+    es*) echo 'Hola!' ;;
+    C|POSIX) echo 'hello world' ;;
+    *)   echo 'I do not speak your language.' ;;
+esac
+# Select construct
+This statement is like a looop and a convience statement that generates a menu of choices
+for the user. The code in the select block is then executed with a variable set to the choice
+the user made. If the choice was invalid the variable is made empty. The menu reappears so long 
+as the break statement is not executed.
+
+echo "Which of these do not belong in this group?"; \
+select choice in Ford Chevy Toyota Microsoft; do
+if [[ $choice = Microsoft ]]
+then echo "Correct! Microsoft is a software company."; break; fi
+echo "Nope. Try Again."
+done
+
+################
+#INPUT / OUTPUT#
+################
+
+
+############
+# SOURCING #
+# ##########
+
+
+
+
