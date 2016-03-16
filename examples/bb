@@ -1,0 +1,18 @@
+#!/bin/bash
+	echo "Commands"
+	echo "Parameters"
+	echo "Characters"
+	echo "Quit"
+while :
+do
+read SUB
+	case $SUB in
+		com*) echo 'Commands' ;;
+		par*) echo 'Parameters!' ;;
+		cha*) echo 'Special Characters!' ;;
+		tes*) echo 'Tests' ;;
+		var*) cat '/root/scripts/variables' ;;
+		  q*) break ;;
+		   *) echo 'Doesnt match anything' ;;
+	esac
+done
