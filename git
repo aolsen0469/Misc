@@ -1,0 +1,9 @@
+#!/bin/bash
+dir=$PWD
+echo "Name:"
+    read -r name
+	git add "${name}"
+echo "Description:"
+    read -r message
+    	git commit -m "${message}"
+	    git push
