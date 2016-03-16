@@ -1,0 +1,18 @@
+#!/bin/bash
+
+myvar=11
+files=/home/adam/scripts/python/*
+
+# Keeps creating files until 49 are made.
+# example name = ex23.py 
+until [ $myvar -eq 50 ]
+do
+    touch "ex${myvar}.py"
+	myvar=$(( $myvar + 1 ))
+done
+
+# Test if file exists; change permissions
+for file in $files
+do
+    test -f "$file" && chmod 755 "$file"
+done
