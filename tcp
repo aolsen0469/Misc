@@ -1,0 +1,5 @@
+#!/bin/bash
+for ETHADP in `ip addr | awk '/eth[0-9]/ {print $2}' | sed 's/://g'`
+  do
+    ethtool -K ${ETHADP} rx off tx off sg off tso off ufo off gso off gro off lro off
+done
