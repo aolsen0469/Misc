@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+service_1="puppet"
+service_2="ntpd"
+service_3="facter"
+dir_1="/var/lib/puppet/*"
+CONF="/etc/puppet/puppet.conf"
+repo_1="puppetlabs"
+
+#Change Hostname
+printf "Block0 - Changing hostname"
+/bin/echo -e "NETWORK=yes\nHOSTNAME=$(hostname)" > /etc/sysconfig/network
+
+# Check if the pre-req repos are installed.
+# If Negative: Install them
+# If Positive: Do Nothing
+printf "Block1"
+yum repolist all | grep -v grep | grep ${repo_1} > /dev/null 
+	if [[ $? != 0 ]]
+		then
+		printf "Installing Repositories..."
+		rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm;
+		rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm;
+	else
+		printf "Already have Repos. Skipping Block1."
+fi
+
+# Check if the puppet agent is already running.
+# If Positive: Stop service. Remove it. Salt the earth.
+# If Negative: Install the Services, make sure it starts on boot
+printf "Block2"
+ps aux | grep -v grep | grep puppet > /dev/null;
+	if [[ $? != 1 ]]
+		then
+		printf "Puppet running. Going to stop the service & delete the directories"
+		/sbin/service ${service_1} stop;
+		yum remove -y ${service_1} ${service_3} > /dev/null;
+		rm -rf ${dir_1};
+	else
+		printf "Puppet not installed. -- Proceeding to install "
+fi
+		yum install -y ${service_1} ${service_3} > /dev/null;
+		chkconfig ${service_1};
+
+# Check if NTP is running.
+# if Positive:  Do Nothing.
+# if Negative: Install NTP, Start it, make sure it starts on boot.
+printf "Block3"
+ps aux | grep -v grep | grep ntpd > /dev/null;
+	if [[ $? != 1 ]]
+		then
+		printf "NTP Running. Skipping block3"
+	elif [[ $? != 0 ]]
+		then
+		printf "NTP not installed. -- Proceeding to install"
+		yum install -y ${service_2};
+		/sbin/service ${service_2} start;
+		chkconfig ${service_2} on;
+fi
+
+# Update Puppet Agent & Update puppet.conf
+printf "Block4"
+/sbin/service ${service_1} start; puppet agent -t --server=foreman.netisopl.net
+
+mv /etc/puppet/puppet.conf /etc/puppet/puppet.conf.original
+
+printf "[main]\n" >> ${CONF}
+printf "    logdir = /var/log/puppet\n" >> ${CONF}
+printf "    rundir = /var/run/puppet\n" >> ${CONF}
+printf "    ssldir = \$vardir/ssl\n" >> ${CONF}
+printf "    server = foreman.netisopl.net\n" >> ${CONF}
+printf " \n" >> ${CONF}
+printf "[agent]\n" >> ${CONF}
+printf "    classfile = \$vardir/classes.txt\n" >> ${CONF}
+printf "    localconfig = \$vardir/localconfig\n" >> ${CONF}
+printf "    runinterval = 600\n" >> ${CONF}
