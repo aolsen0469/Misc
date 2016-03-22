@@ -5,6 +5,7 @@ SERVICE_1="puppet"
 SERVICE_2="ntpd"
 SERVICE_3="facter"
 DIR1="/var/lib/puppet/*"
+CONF="/etc/puppet/puppet.conf"
 REPO_1="puppetlabs"
 # Network; Rename hostname.
 /bin/echo -e "NETWORK=yes\nHOSTNAME=$(hostname)" > /etc/sysconfig/network
@@ -50,4 +51,18 @@ ps aux | grep -v grep | grep ntpd > /dev/null;
 	fi
 # Update Puppet Agent
 echo "Block4"
-/sbin/service ${SERVICE_1} start; puppet agent -t
+/sbin/service ${SERVICE_1} start; puppet agent -t --server=foreman.netisopl.net
+
+mv /etc/puppet/puppet.conf /etc/puppet/puppet.conf.original
+
+printf "[main]\n" >> ${CONF}
+printf "    logdir = /var/log/puppet\n" >> ${CONF}
+printf "    rundir = /var/run/puppet\n" >> ${CONF}
+printf "    ssldir = \$vardir/ssl\n" >> ${CONF}
+printf "    server = foreman.netisopl.net\n" >> ${CONF}
+printf " \n" >> ${CONF}
+printf "[agent]\n" >> ${CONF}
+printf "    classfile = \$vardir/classes.txt\n" >> ${CONF}
+printf "    localconfig = \$vardir/localconfig\n" >> ${CONF}
+printf "    runinterval = 600\n" >> ${CONF}
+
