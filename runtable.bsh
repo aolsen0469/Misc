@@ -1,0 +1,34 @@
+#!/bin/bash
+# 
+# Cycles through tables from database (elements in an array)
+# and attempts to add the table to the root node. This was an attempt to bypass
+# table locks in postgres.
+#
+# Run as a cronjob
+
+table[0]="blah1"
+table[1]="blah2"
+table[2]="blah3"
+table[3]="blah4"
+table[4]="blah5"
+
+#database0
+workdir='/media/database/PostgresPlus/9.4AS/londiste'
+
+#database1
+#workdir="/var/lib/postgresql/londiste"
+cd $workdir
+
+for i in "${table[@]}"
+do
+  test -f $workdir/success-$i && continue
+  londiste3 $workdir/root-test.ini add-table $i \
+    && touch  $workdir/success-$i
+   sleep 30
+done
+
+
+
+
+
+
