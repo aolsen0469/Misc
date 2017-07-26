@@ -1,0 +1,21 @@
+#!/bin/bash
+# ------
+# Author: Adam Olsen
+# PURPOSE: Take a SQL Dump of the current postgresql slave and rotate the directory.
+#-------
+
+# FUNCTION PURPOSE: Takes a SQL Dump of the current postgresql slave
+backup() {
+pg_dumpall -h postgresdb-slave.domain.com -U postgres -w > /db-dump/postgresql/pg-prod.`date +"%Y.%m.%d"`.sql
+}
+
+# FUNCTION PURPOSE: (log rotation) makes sure only the two latest dumps exist at all times.
+rotate() {
+DESTROY=$(ls -t /db-dump/postgresql | grep -v "/$" | awk '{ if (NR > 2) print; }')
+
+for i in ${DESTROY}; do
+       	    rm /db-dump/postgresql/$i
+done
+}
+
+backup && rotate
