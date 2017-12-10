@@ -1,0 +1,23 @@
+#!/bin/bash
+#-------- Requirements--------------------------#
+# 1. pg_basebackup (as postgres user)  		
+# 2. rsync wal logs
+# 3. only keep 2 most recent copies    		
+#-----------------------------------------------#
+
+snapshotdate="tor-pg-prod.`date +"%Y.%m.%d"`"
+dir=/db-dump/postgresql
+
+# FUNCTION PURPOSE: Creates a physical backup of the PostgresDB slave
+backup() {
+cd /db-dump/postgresql;
+pg_basebackup -h db-0.example.com -p 5432 -P -U replication --checkpoint=fast -D ${dir}/${snapshotdate} --xlog-method=stream
+}
+
+# FUNCTION PURPOSE: Log rotation - Will Delete all files in $dir named tor-pg-prod* greater than two 24hour periods
+rotate() {
+find ${dir} -type d -mtime +1 -name "dal-pg-prod*" -exec rm -rf {} \;
+}
+
+cd ${dir};
+backup && rotate
