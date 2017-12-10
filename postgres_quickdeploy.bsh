@@ -1,0 +1,81 @@
+#!/bin/bash
+#-------------------------------------------------#
+# Prerequisites:
+# 1. root access
+# 2. disks already added in vSphere
+#. pg_hba.conf + postgresql.conf 
+
+# TODO Add Disk for Logging
+#--------------------------------------------------#
+user='postgres'
+mount='/media/database'
+confdir='/etc/postgresql/9.6/main'
+grub0='GRUB_CMDLINE_LINUX_DEFAULT=""'
+grub1='GRUB_CMDLINE_LINUX_DEFAULT="transparent_hugepage=never"'
+PGHBA_FILE='./pg_hba.conf'
+CONFIG_FILE='./postgresql.conf'
+diskmounted='grep -qs '/media/database' /proc/mounts'
+disk='/dev/sdb'
+rootdisk='50'
+
+#----------
+# Check if :
+# A) Anything is mounted to /media/database
+# B) SDB is greater than 50GB
+# if either of those things are true; STOP THE SCRIPT
+# else; continue
+#-----------
+diskmounted() {
+mp='mountpoint -q /media/database'
+retval="echo $?"
+${mp} && ${retval}
+}
+
+disksize() {
+df -H /dev/sdb | sed '1d' | awk '{print $2}' | cut -d'G' -f1
+}
+
+diskused() {
+df -H /dev/sdb | sed '1d' | awk '{print $5}' | cut -d'%' -f1
+}
+
+if diskmounted -eq 0 && disksize -ge 50; then
+    echo "DISK ALREADY MOUNTED"; exit 1
+else
+    echo "Nothing mounted - cleared to continue"
+fi
+
+
+# Configure Disk
+mkdir -p ${mount};
+
+if diskused -lt 3; then
+    mkfs.ext4 -F $disk;
+else
+    echo "There might still be data on disk... Aborting"; exit 1
+fi
+
+# Mount Disk
+printf "UUID=$(blkid -s UUID -o value /dev/sdb) ${mount} ext4 defaults 0 0\n" >> /etc/fstab;
+mount -a
+
+# Disable Transparent Hugepages
+sed -i "s/${grub0}/${grub1}/" /etc/default/grub;
+grub-mkconfig -o /boot/grub/grub.cfg;
+
+# Configure Repository & Install Postgresql
+echo 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' >> /etc/apt/sources.list.d/pgdg.list;
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -;
+apt-get update;
+apt-get install -y postgresql-9.6 postgresql-contrib-9.6 postgresql-client;
+
+# Configure Postgresql
+cp -axr /var/lib/postgresql/9.6 /media/database
+rm -rf /var/lib/postgresql/9.6
+# Include pghba.conf + postgresql.conf + script in .tar file
+# Extract files; run script on new node. it will copy the included config-files to the postgres directory.
+mv ${CONFIG_FILE} ${confdir}/postgresql.conf;
+mv ${PGHBA_FILE} ${confdir}/pg_hba.conf;
+chown -R ${user}:${user} ${confdir}
+chown -R ${user}:${user} ${mount}
+# End
